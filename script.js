@@ -45,13 +45,14 @@ async function getRepos(event) {
     if (!flag) {
       throw new Error("err");
     }
+    flag = false;
     const response = await fetch(
       `https://api.github.com/search/repositories?q=${value}`
     );
     const data = await response.json();
     const items = data.items;
     renderPopup(items);
-    flag = false;
+
     return items;
   } catch (e) {
     flag = true;
