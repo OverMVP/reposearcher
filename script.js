@@ -21,7 +21,7 @@ function debounce(fn, t) {
 }
 
 //Вызываем появление поп-апа
-input.addEventListener("keydown", debounce(getRepos, 400));
+input.addEventListener("keydown", debounce(getRepos, 300));
 
 // Удаляем добавленный репозиторий
 itemsList.addEventListener("click", (e) => {
@@ -52,7 +52,6 @@ async function getRepos(event) {
     const data = await response.json();
     const items = data.items;
     renderPopup(items);
-
     return items;
   } catch (e) {
     flag = true;
@@ -62,6 +61,7 @@ async function getRepos(event) {
 //Рендерим поп-ап с пятью элементами и при нажатии на элемент триггерит функцию добавления
 //репозитория
 function renderPopup(items) {
+  flag = true;
   const arr = items;
   const pop_wrapper = document.createElement("ul");
   pop_wrapper.classList.add("popup-wrapper");
@@ -84,7 +84,7 @@ function renderPopup(items) {
       });
     }
   }
-  flag = true;
+  // flag = true;
 }
 
 //Функция добавления репозитория + очистка инпута
@@ -118,5 +118,5 @@ function addNewRepo(item = null) {
     alert("Достигнуто максимальное кол-во репозиториев!");
   }
   input.value = "";
-  flag = true;
+  // flag = true;
 }
