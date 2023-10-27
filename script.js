@@ -5,14 +5,18 @@ const removeBtn = document.querySelector(".b");
 const itemsList = document.querySelector(".repos-wrapper");
 const inputContainer = document.querySelector(".input-container");
 const test = document.querySelector(".listener");
+const _TIMER = 400;
 let flag = true;
-let counter = 1;
+let counter = 0;
 
-// Debounce
+// Debounce func
 
 function debounce(fn, t) {
   let timeout;
   return function (...args) {
+    if (!flag) {
+      return;
+    }
     clearTimeout(timeout);
     timeout = setTimeout(() => {
       fn.call(this, ...args);
@@ -20,48 +24,29 @@ function debounce(fn, t) {
   };
 }
 
-//Вызываем появление поп-апа
-input.addEventListener("keydown", debounce(getRepos, 300));
-
-// Удаляем добавленный репозиторий
-itemsList.addEventListener("click", (e) => {
-  if (e.target.className != "b") return;
-  let repo = e.target.closest(".repo");
-  repo.classList.add("remove");
-  setTimeout(() => {
-    repo.remove();
-    counter--;
-  }, 300);
-});
-
 //Получаем репозитории и вызываем renderPopup
-async function getRepos(event) {
+function getRepos(event) {
   const { value } = event.target;
   value.trim();
   if (value === "") {
     return;
   }
-  try {
-    if (!flag) {
-      throw new Error("err");
-    }
-    flag = false;
-    const response = await fetch(
-      `https://api.github.com/search/repositories?q=${value}`
-    );
-    const data = await response.json();
-    const items = data.items;
-    renderPopup(items);
-    return items;
-  } catch (e) {
-    flag = true;
+  if (!flag) {
+    throw Error("");
   }
+  flag = false;
+  fetch(`https://api.github.com/search/repositories?q=${value}`)
+    .then((r) => r.json())
+    .then((r) => {
+      flag = true;
+      renderPopup(r.items);
+    })
+    .catch((err) => alert(`ERR403: Превышен лимит запросов!`));
 }
 
 //Рендерим поп-ап с пятью элементами и при нажатии на элемент триггерит функцию добавления
 //репозитория
 function renderPopup(items) {
-  flag = true;
   const arr = items;
   const pop_wrapper = document.createElement("ul");
   pop_wrapper.classList.add("popup-wrapper");
@@ -73,24 +58,19 @@ function renderPopup(items) {
 
   for (let i = 0; i < 5; i++) {
     const item = arr[i];
-    if (item) {
+    if (arr.length >= 1) {
       const pop = document.createElement("button");
       pop.classList.add("popup");
-      pop.innerHTML = `📁${item.name} | 👤 ${item.owner.login} | ⭐${item.stargazers_count}`;
+      pop.innerHTML = `📁${item.name} | 👤 ${item.owner.login} | ⭐ ${item.stargazers_count}`;
       pop_wrapper.appendChild(pop);
-      pop.addEventListener("click", (e) => {
-        addNewRepo(item);
-        pop_wrapper.remove();
-      });
     }
   }
-  // flag = true;
 }
 
-//Функция добавления репозитория + очистка инпута
-function addNewRepo(item = null) {
-  if (counter <= 5) {
-    counter++;
+//Add new Repo to the Repositories List + CleanUp the input form
+function addNewRepo(innerHTML) {
+  if (counter < 5) {
+    ++counter;
     const newRepo = document.createElement("ul");
     newRepo.classList.add("repo");
     itemsList.appendChild(newRepo);
@@ -106,17 +86,39 @@ function addNewRepo(item = null) {
     newRemoveBtn.classList.add("b");
     newBtnWrapper.appendChild(newRemoveBtn);
     newRemoveBtn.innerText = "X";
-    newDiv.insertAdjacentHTML(
-      "beforeend",
-      `
-  <div>Repo: ${item.name}</div>
-  <div>User: ${item.owner.login}</div>
-  <div>Stars: ${item.stargazers_count} ⭐</div>
-  `
-    );
+    newDiv.insertAdjacentHTML("beforeend", `${innerHTML}`);
   } else {
     alert("Достигнуто максимальное кол-во репозиториев!");
   }
   input.value = "";
-  // flag = true;
 }
+
+//Event Listener for autocomplete form
+input.addEventListener("keydown", debounce(getRepos, _TIMER));
+
+// Delete Element of Repositories List
+itemsList.addEventListener("click", (e) => {
+  if (e.target.className != "b") return;
+  let repo = e.target.closest(".repo");
+  repo.classList.add("remove");
+  setTimeout(() => {
+    repo.remove();
+    counter--;
+  }, 300);
+});
+
+// Add a Repo to Repositories List
+document.body.addEventListener("click", (e) => {
+  e.stopImmediatePropagation();
+  if (e.target.className !== "popup") {
+    return;
+  }
+  let wrapper = e.target.closest(".popup-wrapper");
+  wrapper.remove();
+  let flyForm = e.target.innerHTML.split("|");
+  flyForm[0] = `<li>Repo: ${flyForm[0].slice(2)}</li>`;
+  flyForm[1] = `<li>User: ${flyForm[1].slice(3)}</li>`;
+  flyForm[2] = `<li>Stars: ${flyForm[2].slice(2)} ⭐</li>`;
+  const innerHTML = flyForm.join("");
+  addNewRepo(innerHTML);
+});
