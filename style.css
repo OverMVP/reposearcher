@@ -109,6 +109,7 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 1.8vh;
 }
 
 .b {
@@ -118,11 +119,11 @@ li {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 45px;
-  height: 45px;
+  width: 5.5vh;
+  height: 5.5vh;
   background: transparent;
   transition: 0.2s;
-  border-radius: 8px;
+  border-radius: 0.5rem;
 }
 
 .b:hover {
