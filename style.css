@@ -151,15 +151,12 @@ li {
 
 .popup-wrapper {
   margin-top: 2.5rem;
-  /* background-color: hsla(192, 38%, 57%, 0.842); */
   display: flex;
   position: absolute;
   width: 50%;
   flex-direction: flex-start;
   padding: 0;
   background: transparent;
-
-  /* flex-direction: column; */
 }
 
 .popup {
