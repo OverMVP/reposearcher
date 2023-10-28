@@ -8,6 +8,7 @@ const test = document.querySelector(".listener");
 const _TIMER = 400;
 let flag = true;
 let counter = 0;
+const regex = /^(?!.*([\s'";\]\[\{\}&^%$#()=])|.*(.)\2{2})/;
 
 // Debounce func
 
@@ -28,7 +29,14 @@ function debounce(fn, t) {
 function getRepos(event) {
   const { value } = event.target;
   value.trim();
+
   if (value === "") {
+    return;
+  }
+
+  if (!regex.test(value)) {
+    alert("Строка содержит запрещенные символы!");
+    input.value = "";
     return;
   }
   if (!flag) {
@@ -37,33 +45,37 @@ function getRepos(event) {
   flag = false;
   fetch(`https://api.github.com/search/repositories?q=${value}`)
     .then((r) => r.json())
+    .catch((err) => alert(`ERR403: Превышен лимит запросов!`))
     .then((r) => {
       flag = true;
       renderPopup(r.items);
-    })
-    .catch((err) => alert(`ERR403: Превышен лимит запросов!`));
+    });
 }
 
 //Рендерим поп-ап с пятью элементами и при нажатии на элемент триггерит функцию добавления
 //репозитория
 function renderPopup(items) {
   const arr = items;
-  const pop_wrapper = document.createElement("ul");
-  pop_wrapper.classList.add("popup-wrapper");
-  inputContainer.appendChild(pop_wrapper);
+  if (arr.length >= 1) {
+    const pop_wrapper = document.createElement("ul");
+    pop_wrapper.classList.add("popup-wrapper");
+    inputContainer.appendChild(pop_wrapper);
 
-  input.addEventListener("keydown", (e) => {
-    pop_wrapper.remove();
-  });
+    input.addEventListener("keyup", (e) => {
+      pop_wrapper.remove();
+    });
 
-  for (let i = 0; i < 5; i++) {
-    const item = arr[i];
-    if (arr.length >= 1) {
+    for (let i = 0; i < 5; i++) {
+      const item = arr[i];
+
       const pop = document.createElement("button");
       pop.classList.add("popup");
       pop.innerHTML = `📁${item.name} | 👤 ${item.owner.login} | ⭐ ${item.stargazers_count}`;
       pop_wrapper.appendChild(pop);
     }
+  } else {
+    alert("Репозитории по вашему запросу не были найдены!");
+    input.value = "";
   }
 }
 
@@ -94,7 +106,7 @@ function addNewRepo(innerHTML) {
 }
 
 //Event Listener for autocomplete form
-input.addEventListener("keydown", debounce(getRepos, _TIMER));
+input.addEventListener("keyup", debounce(getRepos, _TIMER));
 
 // Delete Element of Repositories List
 itemsList.addEventListener("click", (e) => {
