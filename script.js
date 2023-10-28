@@ -8,7 +8,7 @@ const test = document.querySelector(".listener");
 const _TIMER = 400;
 let flag = true;
 let counter = 0;
-const regex = /^(?!.*([\s'";\]\[\{\}&^%$#()=])|.*(.)\2{2})/;
+const regex = /^(?!.*([\s'";\]\[\{\}&^%$#()=?`/])|.*(.)\2{2})/;
 
 // Debounce func
 function debounce(fn, t) {
@@ -104,22 +104,8 @@ function addNewRepo(innerHTML) {
   input.value = "";
 }
 
-//Event Listener for autocomplete form
-input.addEventListener("keyup", debounce(getRepos, _TIMER));
-
-// Delete Element of Repositories List
-itemsList.addEventListener("click", (e) => {
-  if (e.target.className != "b") return;
-  let repo = e.target.closest(".repo");
-  repo.classList.add("remove");
-  setTimeout(() => {
-    repo.remove();
-    counter--;
-  }, 300);
-});
-
-// Add a Repo to Repositories List
-document.body.addEventListener("click", (e) => {
+//preAdderRepo (cleaning autocomplete and calling addNewRepo)
+function preAdderRepo(e) {
   e.stopImmediatePropagation();
   if (e.target.className !== "popup") {
     return;
@@ -132,4 +118,24 @@ document.body.addEventListener("click", (e) => {
   flyForm[2] = `<li>Stars: ${flyForm[2].slice(2)} ⭐</li>`;
   const innerHTML = flyForm.join("");
   addNewRepo(innerHTML);
-});
+}
+
+//deleteRepo fn
+function deleteRepo(e) {
+  if (e.target.className != "b") return;
+  let repo = e.target.closest(".repo");
+  repo.classList.add("remove");
+  setTimeout(() => {
+    repo.remove();
+    counter--;
+  }, 300);
+}
+
+//Event Listener for autocomplete form
+input.addEventListener("keyup", debounce(getRepos, _TIMER));
+
+// Delete Element of Repositories List
+itemsList.addEventListener("click", deleteRepo);
+
+// Add a Repo to Repositories List
+document.body.addEventListener("click", preAdderRepo);
