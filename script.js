@@ -11,7 +11,6 @@ let counter = 0;
 const regex = /^(?!.*([\s'";\]\[\{\}&^%$#()=])|.*(.)\2{2})/;
 
 // Debounce func
-
 function debounce(fn, t) {
   let timeout;
   return function (...args) {
