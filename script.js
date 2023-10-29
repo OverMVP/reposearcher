@@ -82,10 +82,11 @@ function renderPopup(items) {
 function addNewRepo(innerHTML) {
   if (counter < 5) {
     ++counter;
-    const newRepo = document.createElement("ul");
+    const newRepo = document.createElement("li");
     newRepo.classList.add("repo");
     itemsList.appendChild(newRepo);
-    const liInsideRepo = document.createElement("li");
+    const liInsideRepo = document.createElement("div");
+    liInsideRepo.classList.add("card-wrapper");
     newRepo.appendChild(liInsideRepo);
     const newDiv = document.createElement("div");
     newDiv.classList.add("li-info");
@@ -113,9 +114,9 @@ function preAdderRepo(e) {
   let wrapper = e.target.closest(".popup-wrapper");
   wrapper.remove();
   let flyForm = e.target.innerHTML.split("|");
-  flyForm[0] = `<li>Repo: ${flyForm[0].slice(2)}</li>`;
-  flyForm[1] = `<li>User: ${flyForm[1].slice(3)}</li>`;
-  flyForm[2] = `<li>Stars: ${flyForm[2].slice(2)} ⭐</li>`;
+  flyForm[0] = `<p class='mb-0 '>Repo: ${flyForm[0].slice(2)}</p>`;
+  flyForm[1] = `<p class='mb-0 '>User: ${flyForm[1].slice(3)}</p>`;
+  flyForm[2] = `<p class='mb-0 '>Stars: ${flyForm[2].slice(2)} ⭐</p>`;
   const innerHTML = flyForm.join("");
   addNewRepo(innerHTML);
 }
